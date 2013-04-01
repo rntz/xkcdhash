@@ -1,28 +1,31 @@
 #!/bin/bash
 set -e
+cd $(dirname "$0")
+
 test -f NIST_CD_102610.zip || \
     wget http://www.skein-hash.info/sites/default/files/NIST_CD_102610.zip
 
 test -d NIST || unzip NIST_CD_102610.zip
-test -d src || {
-    case `uname -m` in
-        x86_64)
-            echo "using 64-bit version"
-            ln -s NIST/CD/Optimized_64bit src;;
-        x86)
-            echo "using 32-bit version"
-            ln -s NIST/CD/Optimized_32bit src;;
-        *)
-            echo "could not determine architecture, using reference implementation"
-            ln -s NIST/CD/Reference_Implementation src;;
-    esac
-}
+
+rm -f src
+case `uname -m` in
+    x86_64)
+        echo "using 64-bit version"
+        ln -s NIST/CD/Optimized_64bit src;;
+    x86)
+        echo "using 32-bit version"
+        ln -s NIST/CD/Optimized_32bit src;;
+    *)
+        echo "could not determine architecture, using reference implementation"
+        ln -s NIST/CD/Reference_Implementation src;;
+esac
 
 if which nproc >/dev/null 2>&1; then
-    NTHREADS=$(expr 2 \* $(nproc))
+    NTHREADS=$(nproc)
 else
     NTHREADS=16
 fi
+NTHREADS=${NUM_THREADS:-${NTHREADS}}
 
 cp hasher.c src/
 cd src
