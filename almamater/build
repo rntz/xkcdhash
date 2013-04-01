@@ -26,4 +26,5 @@ fi
 
 cp hasher.c src/
 cd src
-gcc -DNUM_THREADS=$NTHREADS -O3 -march=native -std=c99 -pthread hasher.c skein.c skein_block.c -o hasher
+gcc -DNUM_THREADS=$NTHREADS -O3 -march=native -std=c99 -pthread hasher.c skein.c skein_block.c -o hasher || \
+    gcc -DNUM_THREADS=$NTHREADS -O3 -std=c99 -pthread hasher.c skein.c skein_block.c -o hasher
