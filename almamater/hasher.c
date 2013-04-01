@@ -31,7 +31,15 @@ char *interstring;
 #endif
 
 #ifndef NUM_CHARS
-#define NUM_CHARS 5
+#define NUM_CHARS 8
+#endif
+
+#ifndef START_CHAR
+#define START_CHAR 'a'
+#endif
+
+#ifndef STOP_CHAR
+#define STOP_CHAR 'z'
 #endif
 
 int popcnt(u08b_t a){
@@ -75,8 +83,8 @@ void *thrmain(void *arg){
     long long num_steps = 1;
     strcpy(foo + NUM_CHARS, interstring);
     for (int i = 0; i < NUM_CHARS; i++) {
-        foo[i] = '!';
-        num_steps *= '~' - '!' + 1;
+        foo[i] = START_CHAR;
+        num_steps *= STOP_CHAR - START_CHAR + 1;
     }
 
 
@@ -89,8 +97,8 @@ void *thrmain(void *arg){
         }
 
         for (int j = 0; j < NUM_CHARS; j++) {
-            if (foo[j] == '~') {
-                foo[j] = '!';
+            if (foo[j] == STOP_CHAR) {
+                foo[j] = START_CHAR;
             } else {
                 foo[j]++;
                 break;
@@ -110,7 +118,7 @@ int main(int argc, char **argv){
 
     /* TODO: better than this */
     interstring = calloc(1000,sizeof(char));
-    sprintf(interstring,"%lu",time(NULL));
+    sprintf(interstring,"%lx",time(NULL));
 
     for(int i=0;i<NUM_THREADS-1;i++){
         pthread_t foo;
