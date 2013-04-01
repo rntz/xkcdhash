@@ -1,3 +1,9 @@
 #!/bin/bash
+# take "best" from first arg, default to 440
+limit=${1:-440}
+
+# take domain name from second arg, default to "drama.cmu.edu"
+domain=${2:-drama.cmu.edu}
+
 cd $(dirname "$0")
-src/hasher "$@"
+src/hasher ${limit} | ./autosubmit "$domain"

@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+domain="$1"
+best=1000
+while read rank data; do
+    if test "$rank" = Ehlo; then continue; fi
+    if test "$rank" -lt "$best"; then
+        echo "Submitting rank $rank solution and logging to file"
+        best=$rank
+        # TODO: log to file
+        echo "$rank $data" >> submit-log
+        curl --data "hashable=$data" "http://almamater.xkcd.com/?edu=$domain" >/dev/null 2>&1
+    else
+        echo "Not submitting rank $rank solution"
+    fi
+done
