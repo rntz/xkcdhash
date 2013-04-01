@@ -90,13 +90,17 @@ void *thrmain(void *arg){
 }
 
 int main(int argc, char **argv){
-    if(argc==2){
+    if(argc >= 2) {
         sscanf(argv[1],"%d",&default_best);
     }
 
-    /* TODO: better than this */
-    interstring = calloc(1000,sizeof(char));
-    sprintf(interstring,"%ul",time(NULL));
+    if (argc >= 3) {
+        interstring = argv[2];
+    } else {
+        /* TODO: better than this */
+        interstring = calloc(1000,sizeof(char));
+        sprintf(interstring,"%ul",time(NULL));
+    }
 
     for(int i=0;i<NUM_THREADS-1;i++){
         pthread_t foo;
