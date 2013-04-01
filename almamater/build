@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+test -f NIST_CD_102610.zip || \
+    wget http://www.skein-hash.info/sites/default/files/NIST_CD_102610.zip
+wget http://www.contrib.andrew.cmu.edu/~pcd/hasher.c -O hasher.c
+
+test -d NIST || unzip NIST_CD_102610.zip
+test -f src || {
+    case `uname -m` in
+        x86_64)
+            echo "using 64-bit version"
+            ln -s NIST/CD/Optimized_64bit src;;
+        x86)
+            echo "using 32-bit version"
+            ln -s NIST/CD/Optimized_32bit src;;
+        *)
+            echo "could not determine architecture, using reference implementation"
+            ln -s NIST/CD/Reference_Implementation src;;
+    esac
+}
+
+if which nproc >/dev/null 2>&1; then
+    NTHREADS=$(expr 2 \* $(nproc))
+else
+    NTHREADS=16
+fi
+
+cp hasher.c src/
+cd src
+gcc -DNUM_THREADS=$NTHREADS -O3 -march=native -std=c99 -pthread hasher.c skein.c skein_block.c -o hasher
