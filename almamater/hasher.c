@@ -30,6 +30,10 @@ char *interstring;
 #define NUM_THREADS 16
 #endif
 
+#ifndef NUM_CHARS
+#define NUM_CHARS 5
+#endif
+
 int popcnt(u08b_t a){
     int ret = 0;
     while(a!=0){
@@ -60,33 +64,43 @@ int hash(u08b_t *arg,size_t len,u08b_t *res){
     return dif;
 }
 
-
-
 void *thrmain(void *arg){
     unsigned long arg2 = (unsigned long)arg;
     printf("Ehlo from thread %lu\n",arg2);
     u08b_t *res = calloc(128,sizeof(u08b_t));
 
-    char *foo = calloc(100,sizeof(char));
+    int len = strlen(interstring) + NUM_CHARS;
+    char *foo = calloc(len + 1,sizeof(char));
     int best = default_best;
-    char *beststr = calloc(100,sizeof(char));
-    for(unsigned long int j=arg2;j<arg2+(ULONG_MAX/NUM_THREADS);j++){
-        for(unsigned long int i=0;i<ULONG_MAX;i++){
-            size_t len = sprintf(foo,"%lu%s%lu",i,interstring,j);
-            int res2 = hash(foo,len,res);
-            if(res2<best){
-                best=res2;
-                memset(beststr,0,100);
-                strcpy(beststr,foo);
-                printf("%d %s\n",best,beststr);
-                fflush(stdout);
+    long long num_steps = 1;
+    strcpy(foo + NUM_CHARS, interstring);
+    for (int i = 0; i < NUM_CHARS; i++) {
+        foo[i] = '!';
+        num_steps *= '~' - '!' + 1;
+    }
+
+
+    for (long long i = 0; i < num_steps; i++) {
+        int res2 = hash(foo,len,res);
+        if(res2<best){
+            best=res2;
+            printf("%d %s\n",best,foo);
+            fflush(stdout);
+        }
+
+        for (int j = 0; j < NUM_CHARS; j++) {
+            if (foo[j] == '~') {
+                foo[j] = '!';
+            } else {
+                foo[j]++;
+                break;
             }
         }
     }
 
     free(foo);
     free(res);
-    return beststr;
+    return NULL;
 }
 
 int main(int argc, char **argv){
@@ -96,7 +110,7 @@ int main(int argc, char **argv){
 
     /* TODO: better than this */
     interstring = calloc(1000,sizeof(char));
-    sprintf(interstring,"%ul",time(NULL));
+    sprintf(interstring,"%lu",time(NULL));
 
     for(int i=0;i<NUM_THREADS-1;i++){
         pthread_t foo;
