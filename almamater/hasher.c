@@ -7,6 +7,7 @@
 #include "skein.h"
 #include "SHA3api_ref.h"
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
@@ -31,7 +32,7 @@ char *interstring;
 #endif
 
 #ifndef NUM_CHARS
-#define NUM_CHARS 8
+#define NUM_CHARS 9
 #endif
 
 #ifndef START_CHAR
@@ -77,15 +78,16 @@ void *thrmain(void *arg){
     printf("Ehlo from thread %lu\n",arg2);
     u08b_t *res = calloc(128,sizeof(u08b_t));
 
-    int len = strlen(interstring) + NUM_CHARS;
+    int len = strlen(interstring) + NUM_CHARS + 1;
     char *foo = calloc(len + 1,sizeof(char));
     int best = default_best;
     long long num_steps = 1;
-    strcpy(foo + NUM_CHARS, interstring);
     for (int i = 0; i < NUM_CHARS; i++) {
         foo[i] = START_CHAR;
         num_steps *= STOP_CHAR - START_CHAR + 1;
     }
+    foo[NUM_CHARS] = 'a' + arg2;
+    strcpy(foo + NUM_CHARS + 1, interstring);
 
 
     for (long long i = 0; i < num_steps; i++) {
@@ -120,9 +122,9 @@ int main(int argc, char **argv){
     interstring = calloc(1000,sizeof(char));
     sprintf(interstring,"%lx",time(NULL));
 
-    for(int i=0;i<NUM_THREADS-1;i++){
+    for(uintptr_t i=0;i<NUM_THREADS-1;i++){
         pthread_t foo;
-        pthread_create(&foo,NULL,thrmain,(void *)((ULONG_MAX/NUM_THREADS)*i));
+        pthread_create(&foo,NULL,thrmain,(void *)(i));
     }
     thrmain((void *)((ULONG_MAX/NUM_THREADS)*(NUM_THREADS-1)));
     return 0;
